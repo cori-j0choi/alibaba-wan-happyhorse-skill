@@ -6,6 +6,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 export const MODES = new Set(["image", "t2v", "i2v", "r2v", "status"]);
+export const API_KEY_HELP_URL = "https://www.alibabacloud.com/help/en/model-studio/get-api-key";
 const VIDEO_MODELS = {
   t2v: "happyhorse-1.1-t2v",
   i2v: "happyhorse-1.1-i2v",
@@ -49,9 +50,10 @@ function integer(value, fallback, min, max, name) {
 }
 
 export async function resolveConfig(env = process.env) {
-  if (env.DASHSCOPE_API_KEY) {
+  const environmentKey = env.DASHSCOPE_API_KEY?.trim();
+  if (environmentKey) {
     return {
-      apiKey: env.DASHSCOPE_API_KEY.trim(),
+      apiKey: environmentKey,
       baseUrl: (env.DASHSCOPE_BASE_URL || "https://dashscope-intl.aliyuncs.com/compatible-mode/v1").trim(),
       provider: "environment",
     };
@@ -60,16 +62,40 @@ export async function resolveConfig(env = process.env) {
   const configPath = env.OPENCODEX_CONFIG
     ? path.resolve(env.OPENCODEX_CONFIG)
     : path.join(os.homedir(), ".opencodex", "config.json");
-  const config = JSON.parse(await fs.readFile(configPath, "utf8"));
+  let config;
+  try {
+    const text = (await fs.readFile(configPath, "utf8")).replace(/^\uFEFF/, "");
+    config = JSON.parse(text);
+  } catch (error) {
+    const reason = error?.code === "ENOENT"
+      ? `OpenCodeX config was not found at ${configPath}.`
+      : `OpenCodeX config could not be read at ${configPath}: ${error.message}`;
+    throw new Error(apiKeyGuidance(reason));
+  }
   const providerName = env.OPENCODEX_PROVIDER || "alibaba-token-plan-intl";
   const provider = config.providers?.[providerName];
-  if (!provider) throw new Error(`OpenCodeX provider not found: ${providerName}`);
+  if (!provider) {
+    throw new Error(apiKeyGuidance(`OpenCodeX provider was not found: ${providerName}.`));
+  }
   const pooledKey = provider.apiKeyPool?.find((entry) => entry?.key)?.key;
-  const apiKey = provider.apiKey || pooledKey;
+  const apiKey = (provider.apiKey || pooledKey || "").trim();
   if (!apiKey || !provider.baseUrl) {
-    throw new Error(`Provider ${providerName} must contain baseUrl and apiKey`);
+    throw new Error(apiKeyGuidance(`OpenCodeX provider ${providerName} does not contain both baseUrl and apiKey.`));
   }
   return { apiKey, baseUrl: provider.baseUrl, provider: providerName };
+}
+
+export function apiKeyGuidance(reason) {
+  return [
+    reason,
+    "Alibaba Cloud Model Studio API key is required.",
+    `Get an API key: ${API_KEY_HELP_URL}`,
+    "PowerShell (current session): $env:DASHSCOPE_API_KEY=\"your-api-key\"",
+    "PowerShell (save for this Windows user): [Environment]::SetEnvironmentVariable(\"DASHSCOPE_API_KEY\",\"your-api-key\",\"User\")",
+    "macOS/Linux: export DASHSCOPE_API_KEY=\"your-api-key\"",
+    "Alternatively, configure an Alibaba provider with baseUrl and apiKey in ~/.opencodex/config.json.",
+    "Do not paste the key into prompts, source files, or logs.",
+  ].join("\n");
 }
 
 export function requestOrigin(baseUrl) {

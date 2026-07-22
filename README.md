@@ -41,6 +41,8 @@ Restart the agent or start a new task after installation.
 
 Create an international-region Model Studio API key and set:
 
+[Get an Alibaba Cloud Model Studio API key](https://www.alibabacloud.com/help/en/model-studio/get-api-key)
+
 ```bash
 export DASHSCOPE_API_KEY="your-key"
 ```
@@ -51,7 +53,15 @@ PowerShell:
 $env:DASHSCOPE_API_KEY = "your-key"
 ```
 
+Persist it for the current Windows user:
+
+```powershell
+[Environment]::SetEnvironmentVariable("DASHSCOPE_API_KEY", "your-key", "User")
+```
+
 `DASHSCOPE_BASE_URL` is optional. The skill defaults to the international endpoint. It also detects an Alibaba provider in `~/.opencodex/config.json`, so OpenCodeX users do not need to duplicate their key.
+
+If neither configuration source contains a key, the CLI prints the key-creation link and platform-specific setup commands. Do not paste API keys into prompts, source files, or logs.
 
 ## Use
 

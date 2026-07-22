@@ -10,6 +10,8 @@ The CLI resolves credentials in this order:
 
 When only `DASHSCOPE_API_KEY` is set, the CLI uses the international endpoint. Only the origin is reused from an OpenAI-compatible OpenCodeX `baseUrl`. The key is sent in the `Authorization: Bearer` header and is never logged.
 
+If neither source provides a key, stop before making a network request and direct the user to `https://www.alibabacloud.com/help/en/model-studio/get-api-key`. Recommend `DASHSCOPE_API_KEY` or OpenCodeX configuration; never request that a raw key be pasted into chat or source code.
+
 ## Models
 
 | Mode | Model | Input | Output |

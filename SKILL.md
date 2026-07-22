@@ -57,4 +57,6 @@ node "$skill\scripts\alibaba-media.mjs" status `
 
 Add `--dry-run` to any command to validate without sending a billable request. Use `--seed <integer>` only when reproducibility matters. For normal installations, set `DASHSCOPE_API_KEY`; the international endpoint is selected automatically. The default OpenCodeX provider is `alibaba-token-plan-intl`; override it with `OPENCODEX_PROVIDER` only when another provider has the required Model Studio endpoint and key.
 
+If neither source contains a key, tell the user to obtain an Alibaba Cloud Model Studio API key from `https://www.alibabacloud.com/help/en/model-studio/get-api-key` and set `DASHSCOPE_API_KEY`. Never ask the user to paste a key into chat, a prompt, source code, or logs.
+
 For endpoint contracts and input limits, read [references/api.md](references/api.md).

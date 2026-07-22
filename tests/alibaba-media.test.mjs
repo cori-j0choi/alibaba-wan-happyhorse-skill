@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 
 import {
   buildVideoPayload,
@@ -38,6 +41,24 @@ test("resolves a standard international configuration from environment", async (
   const config = await resolveConfig({ DASHSCOPE_API_KEY: "test-key" });
   assert.equal(config.provider, "environment");
   assert.equal(config.baseUrl, "https://dashscope-intl.aliyuncs.com/compatible-mode/v1");
+});
+
+test("gives actionable Alibaba API key guidance when no configuration exists", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "alibaba-skill-"));
+  const missingConfig = path.join(directory, "missing-opencodex.json");
+  try {
+    await assert.rejects(
+      resolveConfig({ OPENCODEX_CONFIG: missingConfig }),
+      (error) => {
+        assert.match(error.message, /Alibaba Cloud Model Studio API key is required/);
+        assert.match(error.message, /DASHSCOPE_API_KEY/);
+        assert.match(error.message, /get-api-key/);
+        return true;
+      },
+    );
+  } finally {
+    await fs.rm(directory, { recursive: true, force: true });
+  }
 });
 
 test("builds HappyHorse 1.1 T2V with watermark disabled", async () => {
