@@ -1,0 +1,17 @@
+{
+  "name": "alibaba-wan-happyhorse-skill",
+  "version": "0.1.0",
+  "description": "Codex skill for Alibaba Wan 2.7 image and HappyHorse 1.1 video generation",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "alibaba-wan-happyhorse-skill": "./scripts/install.mjs"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

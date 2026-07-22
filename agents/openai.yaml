@@ -1,0 +1,4 @@
+interface:
+  display_name: "Alibaba Wan + HappyHorse"
+  short_description: "Generate Wan images and HappyHorse 1.1 videos"
+  default_prompt: "Generate and validate a Wan image or HappyHorse video using Alibaba Model Studio credentials from the environment or OpenCodeX."
