@@ -13,6 +13,54 @@ const VIDEO_MODELS = {
   r2v: "happyhorse-1.1-r2v",
 };
 
+export function usageText() {
+  return `Alibaba Wan + HappyHorse media generator
+
+Usage:
+  node scripts/alibaba-media.mjs <mode> [options]
+
+Modes:
+  image   Generate or edit an image with wan2.7-image-pro
+  t2v     Generate a video from text with happyhorse-1.1-t2v
+  i2v     Animate exactly one first-frame image with happyhorse-1.1-i2v
+  r2v     Generate from 1-9 reference images with happyhorse-1.1-r2v
+  status  Retrieve an existing video task without submitting a duplicate
+
+Common options:
+  --prompt <text>           Required for image, t2v, i2v, and r2v
+  --output <path>           Local output file; defaults under outputs/alibaba-media
+  --image <path-or-url>     Repeat for image editing or r2v; exactly one for i2v
+  --model <id>              Override the mode's default model
+  --dry-run                 Validate and print a redacted payload without generation
+  --no-watermark            Disable watermark (default)
+  --watermark               Explicitly enable watermark
+
+Image options:
+  --size <value>            Default: 1344*768; editing also accepts 1K or 2K
+  --thinking-mode <bool>    Default: true
+
+Video options:
+  --duration <3-15>         Default: 3 seconds
+  --resolution <720P|1080P> Default: 720P
+  --ratio <value>           Default: 16:9 for t2v/r2v; i2v follows its image
+  --seed <integer>          Optional, 0-2147483647
+  --timeout <seconds>       Poll timeout, default: 600
+
+Status options:
+  --task-id <id>            Required task ID returned by a previous submission
+
+Credentials:
+  Set DASHSCOPE_API_KEY, or configure an Alibaba provider in
+  ~/.opencodex/config.json. DASHSCOPE_BASE_URL is optional.
+
+Examples:
+  node scripts/alibaba-media.mjs image --prompt "Pink lotus at dawn" --dry-run
+  node scripts/alibaba-media.mjs t2v --prompt "Golden pollen drifts right" --duration 3
+  node scripts/alibaba-media.mjs i2v --image lotus.png --prompt "Slow push-in"
+  node scripts/alibaba-media.mjs r2v --image lotus.png --image artifact.jpg --prompt "[Image 1] becomes [Image 2]"
+  node scripts/alibaba-media.mjs status --task-id <id> --output recovered.mp4`;
+}
+
 export function parseArgs(argv) {
   const mode = argv.shift();
   if (!MODES.has(mode)) {
@@ -332,7 +380,12 @@ async function retrieveVideoTask(options, config, origin) {
 }
 
 export async function main() {
-  const options = parseArgs(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  if (!argv.length || argv.includes("--help") || argv.includes("-h") || argv[0] === "help") {
+    process.stdout.write(`${usageText()}\n`);
+    return;
+  }
+  const options = parseArgs(argv);
   const config = await resolveConfig();
   const origin = requestOrigin(config.baseUrl);
   let result;

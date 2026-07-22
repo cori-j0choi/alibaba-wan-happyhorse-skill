@@ -10,7 +10,16 @@ import {
   requestOrigin,
   resolveConfig,
   safePayload,
+  usageText,
 } from "../scripts/alibaba-media.mjs";
+
+test("CLI help documents every mode and credential source", () => {
+  const help = usageText();
+  for (const mode of ["image", "t2v", "i2v", "r2v", "status"]) assert.match(help, new RegExp(`\\b${mode}\\b`));
+  assert.match(help, /DASHSCOPE_API_KEY/);
+  assert.match(help, /\.opencodex\/config\.json/);
+  assert.match(help, /--dry-run/);
+});
 
 test("parses repeated image inputs and no-watermark", () => {
   const options = parseArgs([
