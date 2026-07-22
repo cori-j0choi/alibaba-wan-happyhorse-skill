@@ -1,0 +1,4 @@
+outputs/
+.env
+*.log
+.git/
